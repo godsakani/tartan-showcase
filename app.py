@@ -73,11 +73,19 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 # Routes
+@app.route('/health')
+def health_check():
+    return {'status': 'healthy', 'message': 'CMU Africa Hub is running'}, 200
+
 @app.route('/')
 def home():
-    featured_projects = Project.query.filter_by(is_featured=True).order_by(Project.date_created.desc()).limit(6).all()
-    featured_blogs = BlogPost.query.filter_by(is_featured=True).order_by(BlogPost.date_created.desc()).limit(3).all()
-    return render_template('home.html', projects=featured_projects, blogs=featured_blogs)
+    try:
+        featured_projects = Project.query.filter_by(is_featured=True).order_by(Project.date_created.desc()).limit(6).all()
+        featured_blogs = BlogPost.query.filter_by(is_featured=True).order_by(BlogPost.date_created.desc()).limit(3).all()
+        return render_template('home.html', projects=featured_projects, blogs=featured_blogs)
+    except Exception as e:
+        # Fallback if database isn't ready
+        return render_template('home.html', projects=[], blogs=[])
 
 @app.route('/projects')
 def projects():
@@ -206,8 +214,19 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
+# Initialize database
+def init_db():
+    try:
+        with app.app_context():
+            db.create_all()
+            print("Database tables created successfully")
+    except Exception as e:
+        print(f"Database initialization error: {e}")
+
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
+    init_db()
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=os.environ.get('FLASK_ENV') == 'development')
+else:
+    # For production deployment
+    init_db()
