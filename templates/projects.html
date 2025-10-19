@@ -1,0 +1,175 @@
+{% extends "base.html" %} {% block title %}Projects - CMU African Student
+Project Hub{% endblock %} {% block content %}
+<div class="container py-5">
+  <div class="row mb-5">
+    <div class="col-12 text-center">
+      <h1 class="display-4 fw-bold mb-3">Student Projects</h1>
+      <p class="lead text-muted">
+        Explore innovative projects created by CMU African students
+      </p>
+    </div>
+  </div>
+
+  <!-- Filter Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-md-6">
+              <h6 class="mb-0">Filter by Technology</h6>
+            </div>
+            <div class="col-md-6">
+              <select class="form-select" id="techFilter">
+                <option value="">All Technologies</option>
+                <option value="python">Python</option>
+                <option value="javascript">JavaScript</option>
+                <option value="java">Java</option>
+                <option value="react">React</option>
+                <option value="flask">Flask</option>
+                <option value="django">Django</option>
+                <option value="machine-learning">Machine Learning</option>
+                <option value="ai">Artificial Intelligence</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Projects Grid -->
+  <div class="row g-4" id="projectsGrid">
+    {% for project in projects.items %}
+    <div
+      class="col-lg-4 col-md-6 project-item"
+      data-technologies="{{ project.technologies|lower }}"
+    >
+      <div class="card h-100 project-card">
+        {% if project.image_url %}
+        <img
+          src="{{ project.image_url }}"
+          class="card-img-top"
+          alt="{{ project.title }}"
+        />
+        {% else %}
+        <div
+          class="card-img-top bg-light d-flex align-items-center justify-content-center"
+          style="height: 200px"
+        >
+          <i class="fas fa-code fa-3x text-muted"></i>
+        </div>
+        {% endif %}
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">{{ project.title }}</h5>
+          <p class="card-text text-muted">
+            {{ project.description[:150] }}{% if project.description|length >
+            150 %}...{% endif %}
+          </p>
+
+          {% if project.technologies %}
+          <div class="mb-3">
+            {% for tech in project.technologies.split(',') %}
+            <span class="badge bg-secondary me-1">{{ tech.strip() }}</span>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <div class="mt-auto">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <small class="text-muted">
+                <i class="fas fa-user me-1"></i>{{ project.user.full_name }}
+              </small>
+              <small class="text-muted">
+                <i class="fas fa-calendar me-1"></i>{{
+                project.date_created.strftime('%b %d, %Y') }}
+              </small>
+            </div>
+            <div class="d-flex gap-2">
+              <a
+                href="{{ url_for('student_profile', user_id=project.user_id) }}"
+                class="btn btn-outline-primary btn-sm"
+                >View Profile</a
+              >
+              {% if project.github_url %}
+              <a
+                href="{{ project.github_url }}"
+                class="btn btn-outline-dark btn-sm"
+                target="_blank"
+              >
+                <i class="fab fa-github"></i>
+              </a>
+              {% endif %} {% if project.demo_url %}
+              <a
+                href="{{ project.demo_url }}"
+                class="btn btn-outline-success btn-sm"
+                target="_blank"
+              >
+                <i class="fas fa-external-link-alt"></i>
+              </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  {% if projects.pages > 1 %}
+  <nav aria-label="Projects pagination" class="mt-5">
+    <ul class="pagination justify-content-center">
+      {% if projects.has_prev %}
+      <li class="page-item">
+        <a
+          class="page-link"
+          href="{{ url_for('projects', page=projects.prev_num) }}"
+          >Previous</a
+        >
+      </li>
+      {% endif %} {% for page_num in projects.iter_pages() %} {% if page_num %}
+      {% if page_num != projects.page %}
+      <li class="page-item">
+        <a class="page-link" href="{{ url_for('projects', page=page_num) }}"
+          >{{ page_num }}</a
+        >
+      </li>
+      {% else %}
+      <li class="page-item active">
+        <span class="page-link">{{ page_num }}</span>
+      </li>
+      {% endif %} {% else %}
+      <li class="page-item disabled">
+        <span class="page-link">...</span>
+      </li>
+      {% endif %} {% endfor %} {% if projects.has_next %}
+      <li class="page-item">
+        <a
+          class="page-link"
+          href="{{ url_for('projects', page=projects.next_num) }}"
+          >Next</a
+        >
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  document.getElementById("techFilter").addEventListener("change", function () {
+    const selectedTech = this.value.toLowerCase();
+    const projectItems = document.querySelectorAll(".project-item");
+
+    projectItems.forEach((item) => {
+      const technologies = item.dataset.technologies;
+      if (selectedTech === "" || technologies.includes(selectedTech)) {
+        item.style.display = "block";
+      } else {
+        item.style.display = "none";
+      }
+    });
+  });
+</script>
+{% endblock %}

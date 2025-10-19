@@ -1,0 +1,136 @@
+{% extends "base.html" %} {% block title %}{{ student.full_name }} - CMU African
+Student Project Hub{% endblock %} {% block content %}
+<div class="container py-5">
+  <!-- Student Profile Header -->
+  <div class="row mb-5">
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-body text-center">
+          <div class="student-avatar mb-3">
+            {% if student.profile_image %}
+            <img
+              src="{{ student.profile_image }}"
+              class="rounded-circle"
+              width="120"
+              height="120"
+              alt="{{ student.full_name }}"
+            />
+            {% else %}
+            <i class="fas fa-user-circle fa-5x text-primary"></i>
+            {% endif %}
+          </div>
+          <h3 class="card-title">{{ student.full_name }}</h3>
+          <p class="text-muted">{{ student.andrew_id }}</p>
+          <p class="text-muted">{{ student.email }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title mb-3">About</h4>
+          <p class="card-text">{{ student.bio or 'No bio available' }}</p>
+
+          {% if student.research_interests %}
+          <h5 class="mt-4 mb-3">Research Interests</h5>
+          <p class="card-text">{{ student.research_interests }}</p>
+          {% endif %} {% if student.contact_info %}
+          <h5 class="mt-4 mb-3">Contact Information</h5>
+          <p class="card-text">{{ student.contact_info }}</p>
+          {% endif %}
+
+          <div class="mt-4">
+            <small class="text-muted">
+              <i class="fas fa-calendar me-1"></i>Joined {{
+              student.date_joined.strftime('%B %Y') }}
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Student Projects -->
+  <div class="row">
+    <div class="col-12">
+      <h3 class="mb-4">Projects ({{ projects|length }})</h3>
+
+      {% if projects %}
+      <div class="row g-4">
+        {% for project in projects %}
+        <div class="col-lg-4 col-md-6">
+          <div class="card h-100 project-card">
+            {% if project.image_url %}
+            <img
+              src="{{ project.image_url }}"
+              class="card-img-top"
+              alt="{{ project.title }}"
+            />
+            {% else %}
+            <div
+              class="card-img-top bg-light d-flex align-items-center justify-content-center"
+              style="height: 200px"
+            >
+              <i class="fas fa-code fa-3x text-muted"></i>
+            </div>
+            {% endif %}
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title">{{ project.title }}</h5>
+              <p class="card-text text-muted">
+                {{ project.description[:150] }}{% if project.description|length
+                > 150 %}...{% endif %}
+              </p>
+
+              {% if project.technologies %}
+              <div class="mb-3">
+                {% for tech in project.technologies.split(',') %}
+                <span class="badge bg-secondary me-1">{{ tech.strip() }}</span>
+                {% endfor %}
+              </div>
+              {% endif %}
+
+              <div class="mt-auto">
+                <div
+                  class="d-flex justify-content-between align-items-center mb-2"
+                >
+                  <small class="text-muted">
+                    <i class="fas fa-calendar me-1"></i>{{
+                    project.date_created.strftime('%b %d, %Y') }}
+                  </small>
+                </div>
+                <div class="d-flex gap-2">
+                  {% if project.github_url %}
+                  <a
+                    href="{{ project.github_url }}"
+                    class="btn btn-outline-dark btn-sm"
+                    target="_blank"
+                  >
+                    <i class="fab fa-github"></i> Code
+                  </a>
+                  {% endif %} {% if project.demo_url %}
+                  <a
+                    href="{{ project.demo_url }}"
+                    class="btn btn-outline-success btn-sm"
+                    target="_blank"
+                  >
+                    <i class="fas fa-external-link-alt"></i> Demo
+                  </a>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="text-center py-5">
+        <i class="fas fa-code fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">No projects yet</h5>
+        <p class="text-muted">This student hasn't shared any projects yet.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

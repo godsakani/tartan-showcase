@@ -1,0 +1,219 @@
+{% extends "base.html" %} {% block title %}Dashboard - CMU African Student
+Project Hub{% endblock %} {% block content %}
+<div class="container py-5">
+  <div class="row mb-4">
+    <div class="col-12">
+      <h1 class="display-5 fw-bold">Dashboard</h1>
+      <p class="lead text-muted">Manage your projects and blog posts</p>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="row mb-5">
+    <div class="col-md-6">
+      <div class="card bg-primary text-white">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="me-3">
+              <i class="fas fa-plus-circle fa-2x"></i>
+            </div>
+            <div>
+              <h5 class="card-title">Add New Project</h5>
+              <p class="card-text">Showcase your latest work</p>
+              <a href="{{ url_for('add_project') }}" class="btn btn-light"
+                >Add Project</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card bg-success text-white">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="me-3">
+              <i class="fas fa-blog fa-2x"></i>
+            </div>
+            <div>
+              <h5 class="card-title">Write Blog Post</h5>
+              <p class="card-text">Share your experiences</p>
+              <a href="{{ url_for('add_blog') }}" class="btn btn-light"
+                >Write Post</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- My Projects -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>My Projects ({{ projects|length }})</h3>
+        <a href="{{ url_for('add_project') }}" class="btn btn-outline-primary"
+          >Add New Project</a
+        >
+      </div>
+
+      {% if projects %}
+      <div class="row g-4">
+        {% for project in projects %}
+        <div class="col-lg-4 col-md-6">
+          <div class="card h-100 project-card">
+            {% if project.image_url %}
+            <img
+              src="{{ project.image_url }}"
+              class="card-img-top"
+              alt="{{ project.title }}"
+            />
+            {% else %}
+            <div
+              class="card-img-top bg-light d-flex align-items-center justify-content-center"
+              style="height: 200px"
+            >
+              <i class="fas fa-code fa-3x text-muted"></i>
+            </div>
+            {% endif %}
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title">{{ project.title }}</h5>
+              <p class="card-text text-muted">
+                {{ project.description[:150] }}{% if project.description|length
+                > 150 %}...{% endif %}
+              </p>
+
+              {% if project.technologies %}
+              <div class="mb-3">
+                {% for tech in project.technologies.split(',') %}
+                <span class="badge bg-secondary me-1">{{ tech.strip() }}</span>
+                {% endfor %}
+              </div>
+              {% endif %}
+
+              <div class="mt-auto">
+                <div
+                  class="d-flex justify-content-between align-items-center mb-2"
+                >
+                  <small class="text-muted">
+                    <i class="fas fa-calendar me-1"></i>{{
+                    project.date_created.strftime('%b %d, %Y') }}
+                  </small>
+                  {% if project.is_featured %}
+                  <span class="badge bg-warning">Featured</span>
+                  {% endif %}
+                </div>
+                <div class="d-flex gap-2">
+                  {% if project.github_url %}
+                  <a
+                    href="{{ project.github_url }}"
+                    class="btn btn-outline-dark btn-sm"
+                    target="_blank"
+                  >
+                    <i class="fab fa-github"></i>
+                  </a>
+                  {% endif %} {% if project.demo_url %}
+                  <a
+                    href="{{ project.demo_url }}"
+                    class="btn btn-outline-success btn-sm"
+                    target="_blank"
+                  >
+                    <i class="fas fa-external-link-alt"></i>
+                  </a>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="text-center py-5">
+        <i class="fas fa-code fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">No projects yet</h5>
+        <p class="text-muted">Start by adding your first project!</p>
+        <a href="{{ url_for('add_project') }}" class="btn btn-primary"
+          >Add Your First Project</a
+        >
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- My Blog Posts -->
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>My Blog Posts ({{ posts|length }})</h3>
+        <a href="{{ url_for('add_blog') }}" class="btn btn-outline-primary"
+          >Write New Post</a
+        >
+      </div>
+
+      {% if posts %}
+      <div class="row g-4">
+        {% for post in posts %}
+        <div class="col-lg-6">
+          <div class="card h-100 blog-card">
+            {% if post.image_url %}
+            <img
+              src="{{ post.image_url }}"
+              class="card-img-top"
+              alt="{{ post.title }}"
+            />
+            {% else %}
+            <div
+              class="card-img-top bg-light d-flex align-items-center justify-content-center"
+              style="height: 200px"
+            >
+              <i class="fas fa-blog fa-3x text-muted"></i>
+            </div>
+            {% endif %}
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title">{{ post.title }}</h5>
+              <p class="card-text text-muted">
+                {{ post.excerpt or post.content[:150] }}{% if
+                post.content|length > 150 %}...{% endif %}
+              </p>
+
+              <div class="mt-auto">
+                <div
+                  class="d-flex justify-content-between align-items-center mb-2"
+                >
+                  <small class="text-muted">
+                    <i class="fas fa-calendar me-1"></i>{{
+                    post.date_created.strftime('%b %d, %Y') }}
+                  </small>
+                  {% if post.is_featured %}
+                  <span class="badge bg-warning">Featured</span>
+                  {% endif %}
+                </div>
+                <a
+                  href="{{ url_for('blog_post', post_id=post.id) }}"
+                  class="btn btn-outline-primary btn-sm"
+                  >View Post</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="text-center py-5">
+        <i class="fas fa-blog fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">No blog posts yet</h5>
+        <p class="text-muted">
+          Start sharing your experiences with the community!
+        </p>
+        <a href="{{ url_for('add_blog') }}" class="btn btn-primary"
+          >Write Your First Post</a
+        >
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

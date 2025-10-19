@@ -1,0 +1,139 @@
+{% extends "base.html" %} {% block title %}{{ post.title }} - CMU African
+Student Project Hub{% endblock %} {% block content %}
+<div class="container py-5">
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      <!-- Blog Post Header -->
+      <div class="blog-post-header mb-5">
+        <h1 class="display-5 fw-bold mb-3">{{ post.title }}</h1>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div class="author-info d-flex align-items-center">
+            <div class="author-avatar me-3">
+              <i class="fas fa-user-circle fa-2x text-primary"></i>
+            </div>
+            <div>
+              <h6 class="mb-0">{{ post.user.full_name }}</h6>
+              <small class="text-muted">{{ post.user.andrew_id }}</small>
+            </div>
+          </div>
+          <div class="post-meta text-end">
+            <small class="text-muted">
+              <i class="fas fa-calendar me-1"></i>{{
+              post.date_created.strftime('%B %d, %Y') }}
+            </small>
+          </div>
+        </div>
+
+        {% if post.image_url %}
+        <img
+          src="{{ post.image_url }}"
+          class="img-fluid rounded mb-4"
+          alt="{{ post.title }}"
+        />
+        {% endif %}
+      </div>
+
+      <!-- Blog Post Content -->
+      <div class="blog-post-content mb-5">
+        <div class="content-body">
+          {{ post.content|replace('\n', '<br />')|safe }}
+        </div>
+      </div>
+
+      <!-- Author Profile -->
+      <div class="author-card card mb-5">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-md-2">
+              <i class="fas fa-user-circle fa-4x text-primary"></i>
+            </div>
+            <div class="col-md-10">
+              <h5 class="card-title">{{ post.user.full_name }}</h5>
+              <p class="card-text text-muted">
+                {{ post.user.bio or 'No bio available' }}
+              </p>
+              {% if post.user.research_interests %}
+              <p class="card-text">
+                <strong>Research Interests:</strong> {{
+                post.user.research_interests }}
+              </p>
+              {% endif %}
+              <a
+                href="{{ url_for('student_profile', user_id=post.user.id) }}"
+                class="btn btn-outline-primary btn-sm"
+                >View Profile</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comments Section -->
+      <div class="comments-section">
+        <h4 class="mb-4">Comments ({{ comments|length }})</h4>
+
+        {% if current_user.is_authenticated %}
+        <!-- Add Comment Form -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <form
+              method="POST"
+              action="{{ url_for('add_comment', post_id=post.id) }}"
+            >
+              <div class="mb-3">
+                <label for="content" class="form-label">Add a comment</label>
+                <textarea
+                  class="form-control"
+                  id="content"
+                  name="content"
+                  rows="3"
+                  required
+                ></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">
+                Post Comment
+              </button>
+            </form>
+          </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+          <a href="{{ url_for('login') }}" class="alert-link">Login</a> to post
+          a comment.
+        </div>
+        {% endif %}
+
+        <!-- Comments List -->
+        <div class="comments-list">
+          {% for comment in comments %}
+          <div class="comment-item card mb-3">
+            <div class="card-body">
+              <div
+                class="d-flex justify-content-between align-items-start mb-2"
+              >
+                <div class="comment-author">
+                  <strong>{{ comment.user.full_name }}</strong>
+                  <small class="text-muted ms-2"
+                    >{{ comment.user.andrew_id }}</small
+                  >
+                </div>
+                <small class="text-muted"
+                  >{{ comment.date_created.strftime('%b %d, %Y at %I:%M %p')
+                  }}</small
+                >
+              </div>
+              <p class="comment-content mb-0">{{ comment.content }}</p>
+            </div>
+          </div>
+          {% endfor %} {% if not comments %}
+          <div class="text-center text-muted py-4">
+            <i class="fas fa-comments fa-2x mb-2"></i>
+            <p>No comments yet. Be the first to comment!</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,210 @@
+{% extends "base.html" %} {% block title %}Home - Tartan Showcase CMU African
+Student Hub{% endblock %} {% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-primary text-white py-5">
+  <div class="container">
+    <div class="row align-items-center min-vh-50">
+      <div class="col-lg-6">
+        <h1 class="display-4 fw-bold mb-4">
+          Tartan Showcase CMU African Student Hub
+        </h1>
+        <p class="lead mb-4">
+          Connecting brilliant minds, showcasing innovative projects, and
+          fostering collaboration among African students at Carnegie Mellon
+          University.
+        </p>
+        <div class="d-flex gap-3">
+          <a href="{{ url_for('projects') }}" class="btn btn-light btn-lg"
+            >Explore Projects</a
+          >
+          <a href="{{ url_for('blog') }}" class="btn btn-outline-light btn-lg"
+            >Read Blog</a
+          >
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="hero-image">
+          <i class="fas fa-users fa-10x text-white-50"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Latest Projects Section -->
+<section class="py-5">
+  <div class="container">
+    <div class="row mb-5">
+      <div class="col-12 text-center">
+        <h2 class="display-5 fw-bold mb-3">Latest Projects</h2>
+        <p class="lead text-muted">
+          Discover innovative projects created by our talented students
+        </p>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      {% for project in projects %}
+      <div class="col-lg-4 col-md-6">
+        <div class="card h-100 project-card">
+          {% if project.image_url %}
+          <img
+            src="{{ project.image_url }}"
+            class="card-img-top"
+            alt="{{ project.title }}"
+          />
+          {% else %}
+          <div
+            class="card-img-top bg-light d-flex align-items-center justify-content-center"
+            style="height: 200px"
+          >
+            <i class="fas fa-code fa-3x text-muted"></i>
+          </div>
+          {% endif %}
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">{{ project.title }}</h5>
+            <p class="card-text text-muted">
+              {{ project.description[:150] }}{% if project.description|length >
+              150 %}...{% endif %}
+            </p>
+            <div class="mt-auto">
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted">
+                  <i class="fas fa-user me-1"></i>{{ project.user.full_name }}
+                </small>
+                <small class="text-muted">
+                  <i class="fas fa-calendar me-1"></i>{{
+                  project.date_created.strftime('%b %d, %Y') }}
+                </small>
+              </div>
+              <div class="mt-2">
+                <a
+                  href="{{ url_for('student_profile', user_id=project.user_id) }}"
+                  class="btn btn-outline-primary btn-sm"
+                  >View Profile</a
+                >
+                {% if project.github_url %}
+                <a
+                  href="{{ project.github_url }}"
+                  class="btn btn-outline-dark btn-sm ms-2"
+                  target="_blank"
+                >
+                  <i class="fab fa-github"></i> Code
+                </a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="text-center mt-5">
+      <a href="{{ url_for('projects') }}" class="btn btn-primary btn-lg"
+        >View More Projects</a
+      >
+    </div>
+  </div>
+</section>
+
+<!-- Latest Blog Section -->
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="row mb-5">
+      <div class="col-12 text-center">
+        <h2 class="display-5 fw-bold mb-3">Latest Blog Posts</h2>
+        <p class="lead text-muted">
+          Insights, experiences, and stories from our community
+        </p>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      {% for blog in blogs %}
+      <div class="col-lg-6">
+        <div class="card h-100 blog-card">
+          {% if blog.image_url %}
+          <img
+            src="{{ blog.image_url }}"
+            class="card-img-top"
+            alt="{{ blog.title }}"
+          />
+          {% else %}
+          <div
+            class="card-img-top bg-light d-flex align-items-center justify-content-center"
+            style="height: 200px"
+          >
+            <i class="fas fa-blog fa-3x text-muted"></i>
+          </div>
+          {% endif %}
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">{{ blog.title }}</h5>
+            <p class="card-text text-muted">
+              {{ blog.excerpt or blog.content[:150] }}{% if blog.content|length
+              > 150 %}...{% endif %}
+            </p>
+            <div class="mt-auto">
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted">
+                  <i class="fas fa-user me-1"></i>{{ blog.user.full_name }}
+                </small>
+                <small class="text-muted">
+                  <i class="fas fa-calendar me-1"></i>{{
+                  blog.date_created.strftime('%b %d, %Y') }}
+                </small>
+              </div>
+              <div class="mt-2">
+                <a
+                  href="{{ url_for('blog_post', post_id=blog.id) }}"
+                  class="btn btn-outline-primary btn-sm"
+                  >Read More</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="text-center mt-5">
+      <a href="{{ url_for('blog') }}" class="btn btn-primary btn-lg"
+        >View More Posts</a
+      >
+    </div>
+  </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-5">
+  <div class="container">
+    <div class="row text-center">
+      <div class="col-md-3 col-6 mb-4">
+        <div class="stat-item">
+          <h3 class="display-4 fw-bold text-primary">{{ projects|length }}+</h3>
+          <p class="text-muted">Featured Projects</p>
+        </div>
+      </div>
+      <div class="col-md-3 col-6 mb-4">
+        <div class="stat-item">
+          <h3 class="display-4 fw-bold text-primary">{{ blogs|length }}+</h3>
+          <p class="text-muted">Blog Posts</p>
+        </div>
+      </div>
+      <div class="col-md-3 col-6 mb-4">
+        <div class="stat-item">
+          <h3 class="display-4 fw-bold text-primary">50+</h3>
+          <p class="text-muted">Active Students</p>
+        </div>
+      </div>
+      <div class="col-md-3 col-6 mb-4">
+        <div class="stat-item">
+          <h3 class="display-4 fw-bold text-primary">100+</h3>
+          <p class="text-muted">Collaborations</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

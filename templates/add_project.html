@@ -1,0 +1,115 @@
+{% extends "base.html" %} {% block title %}Add Project - CMU African Student
+Project Hub{% endblock %} {% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h3 class="mb-0">
+            <i class="fas fa-plus-circle me-2"></i>Add New Project
+          </h3>
+        </div>
+        <div class="card-body p-5">
+          <form method="POST">
+            <div class="mb-3">
+              <label for="title" class="form-label">Project Title *</label>
+              <input
+                type="text"
+                class="form-control"
+                id="title"
+                name="title"
+                required
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="description" class="form-label">Description *</label>
+              <textarea
+                class="form-control"
+                id="description"
+                name="description"
+                rows="4"
+                required
+              ></textarea>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="image_url" class="form-label"
+                    >Project Image URL</label
+                  >
+                  <input
+                    type="url"
+                    class="form-control"
+                    id="image_url"
+                    name="image_url"
+                  />
+                  <div class="form-text">
+                    Optional: Add an image to showcase your project
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="technologies" class="form-label"
+                    >Technologies Used</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="technologies"
+                    name="technologies"
+                    placeholder="Python, Flask, React, etc."
+                  />
+                  <div class="form-text">
+                    Separate multiple technologies with commas
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="github_url" class="form-label"
+                    >GitHub Repository URL</label
+                  >
+                  <input
+                    type="url"
+                    class="form-control"
+                    id="github_url"
+                    name="github_url"
+                  />
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="demo_url" class="form-label">Demo/Live URL</label>
+                  <input
+                    type="url"
+                    class="form-control"
+                    id="demo_url"
+                    name="demo_url"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex gap-3">
+              <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-save me-2"></i>Add Project
+              </button>
+              <a
+                href="{{ url_for('dashboard') }}"
+                class="btn btn-outline-secondary btn-lg"
+                >Cancel</a
+              >
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
