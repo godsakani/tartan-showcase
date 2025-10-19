@@ -2,9 +2,19 @@ services:
   - type: web
     name: tartan-showcase
     env: python
-    plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn --bind 0.0.0.0:$PORT app:app"
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11.4
+        value: 3.11.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cmu-hub-db
+          property: connectionString
+
+databases:
+  - name: cmu-hub-db
+    databaseName: cmu_hub
+    user: cmu_user
