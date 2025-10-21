@@ -78,9 +78,10 @@ function initializeChat() {
   }
 }
 
-function sendMessage() {
+async function sendMessage() {
   const chatInput = document.getElementById("chatInput");
   const chatMessages = document.getElementById("chatMessages");
+  const sendButton = document.getElementById("sendMessage");
   const message = chatInput.value.trim();
 
   if (message) {
@@ -88,19 +89,53 @@ function sendMessage() {
     addMessage(message, "user");
     chatInput.value = "";
 
-    // Simulate bot response
-    setTimeout(() => {
-      const responses = [
-        "That's interesting! Tell me more about your project.",
-        "Great question! Have you checked out our latest blog posts?",
-        "I'd be happy to help you connect with other students working on similar projects.",
-        "Thanks for sharing! The community would love to hear about your experience.",
-        "That sounds exciting! Feel free to share it as a project on our platform.",
-      ];
-      const randomResponse =
-        responses[Math.floor(Math.random() * responses.length)];
-      addMessage(randomResponse, "bot");
-    }, 1000);
+    // Disable send button and show loading state
+    sendButton.disabled = true;
+    sendButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+    // Add typing indicator
+    addTypingIndicator();
+
+    try {
+      // Call the API endpoint through our proxy
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          question: message,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Remove typing indicator
+      removeTypingIndicator();
+
+      // Add bot response
+      addMessage(data.answer, "bot");
+    } catch (error) {
+      console.error("Error calling chat API:", error);
+
+      // Remove typing indicator
+      removeTypingIndicator();
+
+      // Add error message
+      addMessage(
+        "I'm sorry, I'm having trouble connecting right now. Please try again later.",
+        "bot"
+      );
+    } finally {
+      // Re-enable send button
+      sendButton.disabled = false;
+      sendButton.innerHTML =
+        '<i class="fas fa-paper-plane"></i><span class="sr-only">Send</span>';
+    }
   }
 }
 
@@ -118,6 +153,31 @@ function addMessage(content, sender) {
 
   // Scroll to bottom
   chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function addTypingIndicator() {
+  const chatMessages = document.getElementById("chatMessages");
+  const typingDiv = document.createElement("div");
+  typingDiv.className = "message bot-message typing-indicator";
+  typingDiv.id = "typing-indicator";
+
+  const contentDiv = document.createElement("div");
+  contentDiv.className = "message-content";
+  contentDiv.innerHTML =
+    '<div class="typing-dots"><span></span><span></span><span></span></div>';
+
+  typingDiv.appendChild(contentDiv);
+  chatMessages.appendChild(typingDiv);
+
+  // Scroll to bottom
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function removeTypingIndicator() {
+  const typingIndicator = document.getElementById("typing-indicator");
+  if (typingIndicator) {
+    typingIndicator.remove();
+  }
 }
 
 // Smooth scrolling

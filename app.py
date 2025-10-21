@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+import requests
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
@@ -213,6 +214,37 @@ def add_comment(post_id):
 def logout():
     logout_user()
     return redirect(url_for('home'))
+
+@app.route('/api/chat', methods=['POST'])
+def chat_proxy():
+    """Proxy endpoint to handle chat requests and avoid CORS issues"""
+    try:
+        # Get the question from the request
+        data = request.get_json()
+        if not data or 'question' not in data:
+            return jsonify({'error': 'Question is required'}), 400
+        
+        # Make request to the external API
+        external_api_url = 'https://tartan-qa-system.onrender.com/chat'
+        response = requests.post(
+            external_api_url,
+            json={'question': data['question']},
+            headers={'Content-Type': 'application/json'},
+            timeout=30
+        )
+        
+        # Return the response from the external API
+        if response.status_code == 200:
+            return jsonify(response.json())
+        else:
+            return jsonify({'error': 'External API error'}), response.status_code
+            
+    except requests.exceptions.Timeout:
+        return jsonify({'error': 'Request timeout. Please try again.'}), 408
+    except requests.exceptions.RequestException as e:
+        return jsonify({'error': 'Failed to connect to chat service'}), 500
+    except Exception as e:
+        return jsonify({'error': 'Internal server error'}), 500
 
 # Initialize database
 def init_db():
