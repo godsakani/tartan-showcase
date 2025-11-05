@@ -5,6 +5,7 @@ A modern, responsive web application built with Flask that connects African stud
 ## Features
 
 ### 🏠 Home Page
+
 - Hero section with CMU Africa branding
 - Latest 6 featured projects in a responsive grid
 - Latest 3 blog posts preview
@@ -12,28 +13,33 @@ A modern, responsive web application built with Flask that connects African stud
 - Floating chat icon
 
 ### 📁 Projects Section
+
 - Paginated project listings
 - Technology filtering
 - Student profile integration
 - GitHub and demo links
 
 ### 📝 Blog Section
+
 - Blog post listings with pagination
 - Detailed blog post view with commenting system
 - Author profiles and contact information
 
 ### 👤 User Authentication
+
 - Andrew ID and password login
 - User registration
 - Secure password hashing
 
 ### 🎛️ Dashboard
+
 - User dashboard for managing projects and blog posts
 - Add new projects with technology tags
 - Write and publish blog posts
 - View personal statistics
 
 ### 💬 Interactive Chat
+
 - Floating chat button
 - Real-time chat simulation
 - Community engagement features
@@ -50,11 +56,13 @@ A modern, responsive web application built with Flask that connects African stud
 1. **Activate your virtual environment** (already created as mentioned)
 
 2. **Install dependencies**:
+
    ```bash
    pip install -r requirements.txt
    ```
 
 3. **Run the application**:
+
    ```bash
    python app.py
    ```
@@ -91,34 +99,40 @@ cmu_student_project/
 ## Key Features Implemented
 
 ### ✅ Responsive Design
+
 - Mobile-first approach with Bootstrap 5
 - CMU Africa color scheme (red, gold, blue)
 - Modern, slick UI with smooth animations
 
 ### ✅ Navigation
+
 - Home, Projects, Blog, Login/Register
 - User authentication with Andrew ID
 - Dashboard for authenticated users
 
 ### ✅ Project Management
+
 - Add projects with descriptions, images, GitHub links
 - Technology tagging system
 - Student profile integration
 - Pagination for large project lists
 
 ### ✅ Blog System
+
 - Write and publish blog posts
 - Commenting system
 - Author profiles and contact information
 - Featured posts on homepage
 
 ### ✅ User Profiles
+
 - Student profiles with bio and research interests
 - Project portfolios
 - Contact information
 - Professional presentation
 
 ### ✅ Interactive Features
+
 - Floating chat with simulated responses
 - Technology filtering
 - Smooth scrolling and animations
@@ -134,6 +148,7 @@ cmu_student_project/
 ## Color Scheme
 
 The application uses CMU Africa's official colors:
+
 - **Primary Red**: #C41E3A
 - **Dark Red**: #8B0000
 - **Gold**: #FFD700

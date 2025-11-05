@@ -12,8 +12,12 @@ Student Project Hub{% endblock %} {% block content %}
               <i class="fas fa-user-circle fa-2x text-primary"></i>
             </div>
             <div>
-              <h6 class="mb-0">{{ post.user.full_name }}</h6>
-              <small class="text-muted">{{ post.user.andrew_id }}</small>
+              <h6 class="mb-0">
+                {{ post.user.full_name if post.user else 'Unknown User' }}
+              </h6>
+              <small class="text-muted"
+                >{{ post.user.andrew_id if post.user else 'unknown' }}</small
+              >
             </div>
           </div>
           <div class="post-meta text-end">
@@ -48,9 +52,12 @@ Student Project Hub{% endblock %} {% block content %}
               <i class="fas fa-user-circle fa-4x text-primary"></i>
             </div>
             <div class="col-md-10">
-              <h5 class="card-title">{{ post.user.full_name }}</h5>
+              <h5 class="card-title">
+                {{ post.user.full_name if post.user else 'Unknown User' }}
+              </h5>
               <p class="card-text text-muted">
-                {{ post.user.bio or 'No bio available' }}
+                {{ post.user.bio if post.user and post.user.bio else 'No bio
+                available' }}
               </p>
               {% if post.user.research_interests %}
               <p class="card-text">
@@ -112,9 +119,13 @@ Student Project Hub{% endblock %} {% block content %}
                 class="d-flex justify-content-between align-items-start mb-2"
               >
                 <div class="comment-author">
-                  <strong>{{ comment.user.full_name }}</strong>
+                  <strong
+                    >{{ comment.user.full_name if comment.user else 'Unknown
+                    User' }}</strong
+                  >
                   <small class="text-muted ms-2"
-                    >{{ comment.user.andrew_id }}</small
+                    >{{ comment.user.andrew_id if comment.user else 'unknown'
+                    }}</small
                   >
                 </div>
                 <small class="text-muted"

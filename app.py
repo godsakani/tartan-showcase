@@ -33,6 +33,11 @@ class User(UserMixin, db.Model):
     contact_info = db.Column(db.Text)
     profile_image = db.Column(db.String(200))
     date_joined = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    projects = db.relationship('Project', backref='user', lazy=True, cascade='all, delete-orphan')
+    blog_posts = db.relationship('BlogPost', backref='user', lazy=True, cascade='all, delete-orphan')
+    comments = db.relationship('Comment', backref='user', lazy=True, cascade='all, delete-orphan')
 
     def set_password(self, password):
         self.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
@@ -61,6 +66,9 @@ class BlogPost(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
     is_featured = db.Column(db.Boolean, default=False)
+    
+    # Relationships
+    comments = db.relationship('Comment', backref='blog_post', lazy=True, cascade='all, delete-orphan')
 
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -71,7 +79,7 @@ class Comment(db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 # Routes
 @app.route('/health')
@@ -81,8 +89,8 @@ def health_check():
 @app.route('/')
 def home():
     try:
-        featured_projects = Project.query.filter_by(is_featured=True).order_by(Project.date_created.desc()).limit(6).all()
-        featured_blogs = BlogPost.query.filter_by(is_featured=True).order_by(BlogPost.date_created.desc()).limit(3).all()
+        featured_projects = Project.query.join(User).filter(Project.is_featured==True).order_by(Project.date_created.desc()).limit(6).all()
+        featured_blogs = BlogPost.query.join(User).filter(BlogPost.is_featured==True).order_by(BlogPost.date_created.desc()).limit(3).all()
         return render_template('home.html', projects=featured_projects, blogs=featured_blogs)
     except Exception as e:
         # Fallback if database isn't ready
@@ -90,17 +98,32 @@ def home():
 
 @app.route('/projects')
 def projects():
-    page = request.args.get('page', 1, type=int)
-    projects = Project.query.order_by(Project.date_created.desc()).paginate(
-        page=page, per_page=9, error_out=False)
-    return render_template('projects.html', projects=projects)
+    try:
+        page = request.args.get('page', 1, type=int)
+        # Try to get projects with user relationships
+        projects_query = Project.query.join(User).order_by(Project.date_created.desc())
+        projects = projects_query.paginate(page=page, per_page=9, error_out=False)
+        return render_template('projects.html', projects=projects)
+    except Exception as e:
+        # If join fails, try without join and handle missing users in template
+        try:
+            projects_query = Project.query.order_by(Project.date_created.desc())
+            projects = projects_query.paginate(page=page, per_page=9, error_out=False)
+            return render_template('projects.html', projects=projects)
+        except Exception as e2:
+            # Complete fallback
+            return render_template('projects.html', projects=None)
 
 @app.route('/blog')
 def blog():
-    page = request.args.get('page', 1, type=int)
-    posts = BlogPost.query.order_by(BlogPost.date_created.desc()).paginate(
-        page=page, per_page=6, error_out=False)
-    return render_template('blog.html', posts=posts)
+    try:
+        page = request.args.get('page', 1, type=int)
+        posts = BlogPost.query.join(User).order_by(BlogPost.date_created.desc()).paginate(
+            page=page, per_page=6, error_out=False)
+        return render_template('blog.html', posts=posts)
+    except Exception as e:
+        # Fallback if database relationships aren't ready
+        return render_template('blog.html', posts=None)
 
 @app.route('/blog/<int:post_id>')
 def blog_post(post_id):
@@ -209,11 +232,65 @@ def add_comment(post_id):
     flash('Comment added successfully!', 'success')
     return redirect(url_for('blog_post', post_id=post_id))
 
+@app.route('/delete_project/<int:project_id>', methods=['POST'])
+@login_required
+def delete_project(project_id):
+    project = Project.query.get_or_404(project_id)
+    
+    # Check if the current user owns this project
+    if project.user_id != current_user.id:
+        flash('You can only delete your own projects.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    db.session.delete(project)
+    db.session.commit()
+    flash('Project deleted successfully!', 'success')
+    return redirect(url_for('dashboard'))
+
+@app.route('/delete_blog/<int:post_id>', methods=['POST'])
+@login_required
+def delete_blog(post_id):
+    post = BlogPost.query.get_or_404(post_id)
+    
+    # Check if the current user owns this blog post
+    if post.user_id != current_user.id:
+        flash('You can only delete your own blog posts.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    db.session.delete(post)
+    db.session.commit()
+    flash('Blog post deleted successfully!', 'success')
+    return redirect(url_for('dashboard'))
+
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('home'))
+
+@app.route('/debug/projects')
+def debug_projects():
+    """Debug route to check project data"""
+    try:
+        projects = Project.query.all()
+        project_data = []
+        for project in projects:
+            try:
+                user_name = project.user.full_name if hasattr(project, 'user') and project.user else 'No User'
+            except:
+                user_name = 'Error accessing user'
+            project_data.append({
+                'id': project.id,
+                'title': project.title,
+                'user_id': project.user_id,
+                'user_name': user_name
+            })
+        return jsonify({
+            'total_projects': len(projects),
+            'projects': project_data
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)})
 
 @app.route('/api/chat', methods=['POST'])
 def chat_proxy():
@@ -250,8 +327,10 @@ def chat_proxy():
 def init_db():
     try:
         with app.app_context():
+            # Drop all tables and recreate them to fix relationships
+            db.drop_all()
             db.create_all()
-            print("Database tables created successfully")
+            print("Database tables recreated successfully with proper relationships")
     except Exception as e:
         print(f"Database initialization error: {e}")
 

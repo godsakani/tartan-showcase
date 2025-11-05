@@ -40,7 +40,7 @@ Project Hub{% endblock %} {% block content %}
 
   <!-- Projects Grid -->
   <div class="row g-4" id="projectsGrid">
-    {% for project in projects.items %}
+    {% if projects and projects.items %} {% for project in projects.items %}
     <div
       class="col-lg-4 col-md-6 project-item"
       data-technologies="{{ project.technologies|lower }}"
@@ -78,7 +78,8 @@ Project Hub{% endblock %} {% block content %}
           <div class="mt-auto">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <small class="text-muted">
-                <i class="fas fa-user me-1"></i>{{ project.user.full_name }}
+                <i class="fas fa-user me-1"></i>{% if project.user %}{{
+                project.user.full_name }}{% else %}Unknown User{% endif %}
               </small>
               <small class="text-muted">
                 <i class="fas fa-calendar me-1"></i>{{
@@ -113,14 +114,22 @@ Project Hub{% endblock %} {% block content %}
         </div>
       </div>
     </div>
-    {% endfor %}
+    {% endfor %} {% else %}
+    <div class="col-12">
+      <div class="text-center py-5">
+        <i class="fas fa-code fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">No projects available</h5>
+        <p class="text-muted">Check back later for new projects!</p>
+      </div>
+    </div>
+    {% endif %}
   </div>
 
   <!-- Pagination -->
-  {% if projects.pages > 1 %}
+  {% if projects and projects.pages > 1 %}
   <nav aria-label="Projects pagination" class="mt-5">
     <ul class="pagination justify-content-center">
-      {% if projects.has_prev %}
+      {% if projects and projects.has_prev %}
       <li class="page-item">
         <a
           class="page-link"
@@ -128,8 +137,8 @@ Project Hub{% endblock %} {% block content %}
           >Previous</a
         >
       </li>
-      {% endif %} {% for page_num in projects.iter_pages() %} {% if page_num %}
-      {% if page_num != projects.page %}
+      {% endif %} {% if projects %}{% for page_num in projects.iter_pages() %}
+      {% if page_num %} {% if page_num != projects.page %}
       <li class="page-item">
         <a class="page-link" href="{{ url_for('projects', page=page_num) }}"
           >{{ page_num }}</a
@@ -143,7 +152,8 @@ Project Hub{% endblock %} {% block content %}
       <li class="page-item disabled">
         <span class="page-link">...</span>
       </li>
-      {% endif %} {% endfor %} {% if projects.has_next %}
+      {% endif %} {% endfor %}{% endif %} {% if projects and projects.has_next
+      %}
       <li class="page-item">
         <a
           class="page-link"
